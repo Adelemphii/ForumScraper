@@ -32,6 +32,8 @@ public class ScrapeUtility {
         TemporalAccessor accessor = Instant.ofEpochMilli(topic.getPostDate().getMillis());
         builder.setTimestamp(accessor);
 
+        builder.setFooter(topic.getTopicType().getName());
+
         return builder;
     }
 
