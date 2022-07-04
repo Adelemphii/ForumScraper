@@ -3,26 +3,21 @@ package tech.adelemphii.forumscraper.discord;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import tech.adelemphii.forumscraper.discord.commands.BaseCommand;
+import tech.adelemphii.forumscraper.discord.commands.CommandChannel;
+import tech.adelemphii.forumscraper.discord.commands.CommandPing;
+import tech.adelemphii.forumscraper.discord.events.MessageListener;
 import tech.adelemphii.forumscraper.discord.events.ReadyListener;
-import tech.adelemphii.forumscraper.utility.Configuration;
+import tech.adelemphii.forumscraper.utility.data.Configuration;
 
 import javax.security.auth.login.LoginException;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DiscordBot {
 
     private JDA api;
-    private ScheduledExecutorService statusRunnable;
-
-    private List<String> activityMessages = List.of(
-            "ForumScraper by Adelemphii",
-            ":D",
-            "Yay!"
-    );
+    public Map<String, BaseCommand> commands = new HashMap<>();
 
     public DiscordBot(Configuration configuration) {
 
@@ -33,40 +28,26 @@ public class DiscordBot {
             return;
         }
         registerEvents();
-        startActivityUpdateTask();
+        registerCommands();
+        api.getPresence().setActivity(Activity.playing("ForumScraper by Adelemphii"));
     }
 
     public void stop(boolean now) {
         if(now) {
             api.shutdownNow();
-            statusRunnable.shutdownNow();
         } else {
             api.shutdown();
-            statusRunnable.shutdown();
         }
-    }
-
-
-    private void startActivityUpdateTask() {
-        AtomicInteger current = new AtomicInteger();
-        Runnable statusRunnable = () -> {
-            String message = activityMessages.get(current.get());
-            current.getAndIncrement();
-
-            api.getPresence().setActivity(Activity.playing(message));
-            System.out.println("Activity is now... " + message);
-
-        };
-
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(statusRunnable, 0, 20, TimeUnit.SECONDS);
-
-        this.statusRunnable = executor;
     }
 
     private void registerEvents() {
         api.addEventListener(new ReadyListener());
+        api.addEventListener(new MessageListener(this));
+    }
 
+    private void registerCommands() {
+        commands.put("ping", new CommandPing());
+        commands.put("channel", new CommandChannel());
     }
 
     public boolean login(String token) {
@@ -81,17 +62,5 @@ public class DiscordBot {
 
     public JDA getApi() {
         return api;
-    }
-
-    public List<String> getActivityMessages() {
-        return activityMessages;
-    }
-
-    public void setActivityMessages(List<String> activityMessages) {
-        this.activityMessages = activityMessages;
-    }
-
-    public void addActivityMessage(String string) {
-        activityMessages.add(string);
     }
 }

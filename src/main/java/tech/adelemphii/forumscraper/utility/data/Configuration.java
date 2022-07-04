@@ -1,7 +1,8 @@
-package tech.adelemphii.forumscraper.utility;
+package tech.adelemphii.forumscraper.utility.data;
+
+import tech.adelemphii.forumscraper.utility.UserInput;
 
 import java.io.*;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -119,6 +120,14 @@ public class Configuration {
 
     public void setHeadless(boolean headless) {
         this.headless = headless;
+    }
+
+    public String getCommandPrefix() {
+        return commandPrefix;
+    }
+
+    public void setCommandPrefix(String commandPrefix) {
+        this.commandPrefix = commandPrefix;
     }
 
     @Override

@@ -1,8 +1,8 @@
 package tech.adelemphii.forumscraper;
 
 import tech.adelemphii.forumscraper.discord.DiscordBot;
-import tech.adelemphii.forumscraper.utility.Configuration;
-import tech.adelemphii.forumscraper.utility.ScrapeUtility;
+import tech.adelemphii.forumscraper.utility.data.Configuration;
+import tech.adelemphii.forumscraper.utility.data.ServerStorageUtility;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -25,13 +25,18 @@ public class ForumScraper {
             return;
         }
 
+
+
         file = new File(file.getPath() + "/files/config.yml");
         configuration.loadConfiguration(file);
+
+        ServerStorageUtility.loadServers();
 
         discordBot = new DiscordBot(configuration);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             discordBot.stop(false);
+            ServerStorageUtility.saveServers();
 
             System.out.println("Shutting down...");
         }, "Shutdown-thread"));
