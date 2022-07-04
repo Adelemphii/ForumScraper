@@ -25,12 +25,6 @@ public class CommandChannel implements BaseCommand {
         String[] args = event.getMessage().getContentRaw()
                 .replace(Configuration.getInstance().getCommandPrefix() + "channel ", "").split(" ");
 
-        StringBuilder string = new StringBuilder();
-        for(String arg : args) {
-            string.append(" ").append(arg);
-        }
-        System.out.println(string);
-
         if(args[0].equalsIgnoreCase("set")) {
             if(Long.getLong(args[2]) != null) {
                 event.getMessage().addReaction(Emoji.fromUnicode("\uD83D\uDC4E")).queue();
@@ -58,12 +52,17 @@ public class CommandChannel implements BaseCommand {
     private void update(Guild guild, Message message) {
         String popularTopicError = ScrapeUtility.sendPopularTopics(guild);
         String latestTopicError = ScrapeUtility.sendLatestTopics(guild);
+        String statusUpdateError = ScrapeUtility.sendStatusUpdates(guild);
         if(popularTopicError != null) {
             message.reply("Error: " + popularTopicError).queue();
         }
 
         if(latestTopicError != null) {
             message.reply("Error: " + latestTopicError).queue();
+        }
+
+        if(statusUpdateError != null) {
+            message.reply("Error: " + statusUpdateError).queue();
         }
     }
 

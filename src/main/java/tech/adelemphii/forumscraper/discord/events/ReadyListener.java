@@ -5,8 +5,24 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import org.jetbrains.annotations.NotNull;
+import tech.adelemphii.forumscraper.discord.DiscordBot;
+import tech.adelemphii.forumscraper.utility.ScrapeUtility;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ReadyListener implements EventListener {
+
+    private final DiscordBot discordBot;
+
+    public ReadyListener(DiscordBot discordBot) {
+        this.discordBot = discordBot;
+    }
 
     @Override
     public void onEvent(@NotNull GenericEvent event) {
@@ -15,7 +31,17 @@ public class ReadyListener implements EventListener {
         }
 
         if(event instanceof GuildReadyEvent guildReadyEvent) {
-            // make a runnable which runs every 5 minutes, and when it runs it'll scrape the information and update its message in
+            Runnable statusRunnable = () -> {
+                ScrapeUtility.sendStatusUpdates(guildReadyEvent.getGuild());
+                ScrapeUtility.sendPopularTopics(guildReadyEvent.getGuild());
+                ScrapeUtility.sendLatestTopics(guildReadyEvent.getGuild());
+            };
+
+            ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+            executor.scheduleAtFixedRate(statusRunnable, 0, 10, TimeUnit.MINUTES);
+
+            discordBot.addUpdateRunnable(guildReadyEvent.getGuild().getIdLong(), statusRunnable);
         }
+
     }
 }

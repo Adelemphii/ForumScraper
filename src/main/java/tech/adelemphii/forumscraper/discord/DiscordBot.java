@@ -13,11 +13,14 @@ import tech.adelemphii.forumscraper.utility.data.Configuration;
 import javax.security.auth.login.LoginException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class DiscordBot {
 
     private JDA api;
     public Map<String, BaseCommand> commands = new HashMap<>();
+    private Map<Long, Runnable> updateRunnables = new HashMap<>();
 
     public DiscordBot(Configuration configuration) {
 
@@ -30,6 +33,7 @@ public class DiscordBot {
         registerEvents();
         registerCommands();
         api.getPresence().setActivity(Activity.playing("ForumScraper by Adelemphii"));
+
     }
 
     public void stop(boolean now) {
@@ -41,7 +45,7 @@ public class DiscordBot {
     }
 
     private void registerEvents() {
-        api.addEventListener(new ReadyListener());
+        api.addEventListener(new ReadyListener(this));
         api.addEventListener(new MessageListener(this));
     }
 
@@ -58,6 +62,18 @@ public class DiscordBot {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public Map<Long, Runnable> getUpdateRunnables() {
+        return updateRunnables;
+    }
+
+    public void setUpdateRunnables(Map<Long, Runnable> updateRunnables) {
+        this.updateRunnables = updateRunnables;
+    }
+
+    public void addUpdateRunnable(Long guildName, Runnable runnable) {
+        updateRunnables.put(guildName, runnable);
     }
 
     public JDA getApi() {

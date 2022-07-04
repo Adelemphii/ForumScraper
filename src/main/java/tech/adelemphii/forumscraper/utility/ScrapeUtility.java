@@ -47,6 +47,25 @@ public class ScrapeUtility {
         return builder.build();
     }
 
+    public static MessageEmbed createStatusEmbed(Topic topic, Color color) {
+        EmbedBuilder builder = new EmbedBuilder();
+
+        builder.setTitle(topic.getAuthor().getName(), topic.getUrl());
+        builder.setColor(color);
+
+        builder.setDescription(topic.getTitle());
+
+        TemporalAccessor accessor = Instant.ofEpochMilli(topic.getPostDate().getMillis());
+        builder.setTimestamp(accessor);
+
+        builder.addField("Reply Count", topic.getCommentCount() + "", true);
+        builder.addField("Time Posted", TimeFormat.RELATIVE.format(topic.getPostDate().getMillis()), true);
+
+        builder.setFooter(topic.getTopicType().getName());
+
+        return builder.build();
+    }
+
     private static String doChecks(Server server, Guild guild, ArrayList<Topic> topicList) {
         if(server == null) {
             return "SERVER IS NULL";
@@ -74,8 +93,7 @@ public class ScrapeUtility {
         for(Topic topic : topicsToRemove) {
             topicList.remove(topic);
         }
-        // if topicType is popular topics, sort by comment count
-        // else sort by time posted
+
         if(topicType == TopicType.POPULAR_TOPIC) {
             topicList.sort((t1, t2) -> t2.getCommentCount() - t1.getCommentCount());
         } else {
@@ -154,6 +172,93 @@ public class ScrapeUtility {
                                 ServerStorageUtility.addServer(server);
                             })
                     );
+        }
+        return null;
+    }
+
+    public static String sendStatusUpdates(Guild guild) {
+        Server server = ServerStorageUtility.getServer(guild.getIdLong());
+        ArrayList<Topic> topicList = scrapeStatuses("https://www.lordofthecraft.net/forums/");
+
+        String checks = doChecks(server, guild, topicList);
+
+        if(checks != null) {
+            return checks;
+        }
+
+        TextChannel channel = guild.getTextChannelById(server.getStatusUpdatesChannel());
+
+        assert topicList != null;
+        topicList = filterTopics(topicList, TopicType.STATUS_UPDATE);
+        ArrayList<MessageEmbed> embedList = filterEmbeds(topicList);
+
+        assert channel != null;
+        if(server.getStatusUpdatesMessage() == null) {
+            channel.sendMessageEmbeds(embedList).queue(message -> server.setStatusUpdatesMessage(message.getIdLong()));
+            ServerStorageUtility.addServer(server);
+        } else {
+            channel.retrieveMessageById(server.getStatusUpdatesMessage())
+                    .queue(topicMessage -> topicMessage.editMessageEmbeds(embedList).queue(),
+                            new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, (e) -> {
+                                channel.sendMessageEmbeds(embedList).queue(message
+                                        -> server.setStatusUpdatesMessage(message.getIdLong()));
+                                ServerStorageUtility.addServer(server);
+                            })
+                    );
+        }
+        return null;
+    }
+
+    public static ArrayList<Topic> scrapeStatuses(String url) {
+        ArrayList<Topic> topics = new ArrayList<>();
+        try {
+            Document document = Jsoup.connect(url).get();
+            Elements listElements = document.getElementsByClass("ipsWidget ipsWidget_vertical cAdvancedStatusUpdatesWidget");
+
+            Element first = listElements.first();
+            if(first == null) {
+                return null;
+            }
+
+            listElements = first.getElementsByClass("ipsDataItem");
+
+            for(Element topicElement : listElements) {
+
+                Element authorElement = topicElement.getElementsByClass("ipsType_medium ipsType_reset").get(0);
+
+                Element authorNameElement = authorElement.getElementsByClass("ipsType_break").get(0);
+                String profileName = authorNameElement.text();
+
+                String profileLink = authorNameElement.attr("abs:href");
+                Author author = new Author(profileName, null, profileLink);
+
+                Element textElement = topicElement.getElementsByClass("ipsType_richText").get(0);
+                String text = textElement.text();
+
+                String replyCount = topicElement.attr("abs:data-commentcount")
+                        .replace("https://www.lordofthecraft.net/forums/", "");
+
+                int commentAmount = Integer.parseInt(replyCount);
+
+                Element infoElement = topicElement.getElementsByClass("ipsType_blendLinks ipsPos_middle").get(0);
+                Element topicLinkElement = infoElement.getElementsByAttribute("href").get(0);
+
+                String topicLink = topicLinkElement.attr("abs:href");
+
+                Element timeElement = topicElement.getElementsByAttribute("datetime").get(0);
+
+                String postTime = timeElement.attr("title");
+                DateTime posTime = DateTimeFormat.forPattern("MM/dd/yy hh:mm  a").withZone(DateTimeZone.UTC).parseDateTime(postTime);
+
+                Topic topic = new Topic(text, topicLink, posTime, author, TopicType.STATUS_UPDATE, commentAmount);
+
+                topic.setEmbed(createStatusEmbed(topic, Color.PINK));
+
+                topics.add(topic);
+            }
+            return topics;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }

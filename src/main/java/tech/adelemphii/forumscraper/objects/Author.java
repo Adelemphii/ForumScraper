@@ -1,12 +1,14 @@
 package tech.adelemphii.forumscraper.objects;
 
+import org.jetbrains.annotations.Nullable;
+
 public class Author {
 
-    String name;
-    String image;
-    String url;
+    private String name;
+    private String image;
+    private String url;
 
-    public Author(String name, String image, String url) {
+    public Author(String name, @Nullable String image, String url) {
         this.name = name;
         this.image = image;
         this.url = url;
