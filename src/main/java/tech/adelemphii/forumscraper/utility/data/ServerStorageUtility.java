@@ -45,8 +45,6 @@ public class ServerStorageUtility {
         }
         Gson gson = new Gson();
 
-        System.out.println(servers);
-
         try {
             serversFile.getParentFile().mkdir();
             serversFile.createNewFile();
@@ -76,7 +74,6 @@ public class ServerStorageUtility {
 
                 for (Server server : serverArray) {
                     servers.put(server.getServerID(), server);
-                    System.out.println(server);
                 }
                 System.out.println("Server information has been loaded.");
             }

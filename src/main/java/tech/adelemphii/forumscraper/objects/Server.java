@@ -13,6 +13,11 @@ public class Server {
     private Long latestTopicsMessage;
     private Long statusUpdatesMessage;
 
+    // per-server config
+    private String commandPrefix = "!";
+    private long adminRoleID = 0;
+    private long commandsChannelID = 0;
+
     public Server(long serverID, @Nullable Long popularTopicsChannel, @Nullable Long latestTopicsChannel, @Nullable Long statusUpdatesChannel,
                   @Nullable Long popularTopicMessage, @Nullable Long latestTopicsMessage, @Nullable Long statusUpdatesMessage) {
         this.serverID = serverID;
@@ -22,6 +27,14 @@ public class Server {
         this.popularTopicMessage = popularTopicMessage;
         this.latestTopicsMessage = latestTopicsMessage;
         this.statusUpdatesMessage = statusUpdatesMessage;
+    }
+
+    public String getCommandPrefix() {
+        return commandPrefix;
+    }
+
+    public void setCommandPrefix(String commandPrefix) {
+        this.commandPrefix = commandPrefix;
     }
 
     public long getServerID() {
@@ -76,6 +89,22 @@ public class Server {
         this.statusUpdatesMessage = statusUpdatesMessage;
     }
 
+    public long getAdminRoleID() {
+        return adminRoleID;
+    }
+
+    public void setAdminRoleID(long adminRoleID) {
+        this.adminRoleID = adminRoleID;
+    }
+
+    public long getCommandsChannelID() {
+        return commandsChannelID;
+    }
+
+    public void setCommandsChannelID(long commandsChannelID) {
+        this.commandsChannelID = commandsChannelID;
+    }
+
     @Override
     public String toString() {
         return "Server{" +
@@ -86,6 +115,9 @@ public class Server {
                 ", popularTopicMessage=" + popularTopicMessage +
                 ", latestTopicsMessage=" + latestTopicsMessage +
                 ", statusUpdatesMessage=" + statusUpdatesMessage +
+                ", commandPrefix='" + commandPrefix + '\'' +
+                ", adminRoleID=" + adminRoleID +
+                ", commandsChannelID=" + commandsChannelID +
                 '}';
     }
 }

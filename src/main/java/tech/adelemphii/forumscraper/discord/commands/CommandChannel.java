@@ -1,13 +1,15 @@
 package tech.adelemphii.forumscraper.discord.commands;
 
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import tech.adelemphii.forumscraper.objects.Server;
-import tech.adelemphii.forumscraper.objects.TopicType;
+import tech.adelemphii.forumscraper.utility.GeneralUtility;
 import tech.adelemphii.forumscraper.utility.ScrapeUtility;
-import tech.adelemphii.forumscraper.utility.data.Configuration;
 import tech.adelemphii.forumscraper.utility.data.ServerStorageUtility;
 
 public class CommandChannel implements BaseCommand {
@@ -17,13 +19,8 @@ public class CommandChannel implements BaseCommand {
         Guild guild = event.getGuild();
         Server server = ServerStorageUtility.getServer(guild.getIdLong());
 
-        if(server == null) {
-            System.out.println("Server: " + guild.getIdLong() + " does not have a saved config, generating a new one.");
-            server = new Server(guild.getIdLong(), null, null, null, null, null, null);
-        }
-
         String[] args = event.getMessage().getContentRaw()
-                .replace(Configuration.getInstance().getCommandPrefix() + "channel ", "").split(" ");
+                .replace(server.getCommandPrefix() + "channel ", "").split(" ");
 
         if(args[0].equalsIgnoreCase("set")) {
             if(Long.getLong(args[2]) != null) {
@@ -41,7 +38,23 @@ public class CommandChannel implements BaseCommand {
         } else if(args[0].equalsIgnoreCase("update")) {
             event.getMessage().addReaction(Emoji.fromUnicode("\uD83D\uDC4D")).queue();
             update(guild, event.getMessage());
+        } else if(args[0].equalsIgnoreCase("help")) {
+            help(server, event.getMessage());
         }
+    }
+
+    private void help(Server server, Message message) {
+        EmbedBuilder builder = new EmbedBuilder();
+
+        builder.setTitle("Channel Command Args");
+        builder.setDescription(server.getCommandPrefix() + "channel <command> <type> <id>");
+
+        builder.addField("Argument 1", "Valid Subcommands: set, saveconfig, update, help", false);
+        builder.addField("Argument 2", "Valid types: popular_topics, latest_topics, status_updates", false);
+        builder.addField("Argument 3", "Channel ID, such as 819699195681832991", false);
+
+        message.reply("Examples: " + server.getCommandPrefix() + "channel set popular_topics 910726981610512415 or " +
+                server.getCommandPrefix() + "channel update").setEmbeds(builder.build()).queue();
     }
 
     private void saveConfig(Message message) {
@@ -84,5 +97,10 @@ public class CommandChannel implements BaseCommand {
                 return false;
             }
         }
+    }
+
+    @Override
+    public boolean requireAdmin() {
+        return true;
     }
 }

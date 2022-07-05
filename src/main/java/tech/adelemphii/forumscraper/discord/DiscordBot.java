@@ -3,9 +3,7 @@ package tech.adelemphii.forumscraper.discord;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
-import tech.adelemphii.forumscraper.discord.commands.BaseCommand;
-import tech.adelemphii.forumscraper.discord.commands.CommandChannel;
-import tech.adelemphii.forumscraper.discord.commands.CommandPing;
+import tech.adelemphii.forumscraper.discord.commands.*;
 import tech.adelemphii.forumscraper.discord.events.MessageListener;
 import tech.adelemphii.forumscraper.discord.events.ReadyListener;
 import tech.adelemphii.forumscraper.utility.data.Configuration;
@@ -13,13 +11,11 @@ import tech.adelemphii.forumscraper.utility.data.Configuration;
 import javax.security.auth.login.LoginException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class DiscordBot {
 
     private JDA api;
-    public Map<String, BaseCommand> commands = new HashMap<>();
+    private final Map<String, BaseCommand> commands = new HashMap<>();
     private Map<Long, Runnable> updateRunnables = new HashMap<>();
 
     public DiscordBot(Configuration configuration) {
@@ -52,6 +48,8 @@ public class DiscordBot {
     private void registerCommands() {
         commands.put("ping", new CommandPing());
         commands.put("channel", new CommandChannel());
+        commands.put("config", new CommandConfig());
+        commands.put("credits", new CommandCredits());
     }
 
     public boolean login(String token) {
@@ -78,5 +76,9 @@ public class DiscordBot {
 
     public JDA getApi() {
         return api;
+    }
+
+    public Map<String, BaseCommand> getCommands() {
+        return commands;
     }
 }

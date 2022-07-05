@@ -11,8 +11,6 @@ public class Configuration {
     private String discordBotToken;
     private boolean headless;
 
-    private String commandPrefix = "!";
-
     private static Configuration instance;
 
     public static Configuration getInstance() {
@@ -55,20 +53,13 @@ public class Configuration {
                         discordBotToken = value;
                     } else if(key.equals("headless")) {
                         headless = Boolean.parseBoolean(value);
-                    } else if(key.equalsIgnoreCase("commandPrefix")) {
-                        commandPrefix = value;
                     }
                 }
-            }
-            if(commandPrefix == null || commandPrefix.isEmpty() || commandPrefix.isBlank()) {
-                commandPrefix = "!";
             }
         } catch (IOException e) {
             System.out.println("Error reading configuration file.");
             System.exit(1);
-            return;
         }
-        System.out.println(this);
     }
 
     private void writeConfig(File configurationFile, Map<String, ?> config) {
@@ -91,19 +82,17 @@ public class Configuration {
 
     private Map<String, ?> createConfig() {
         Console console = System.console();
-        String token = "";
+        String token;
 
         // if the console is null, it's being run from inside an IDE & masking inside an IDE is wonky
         if(console != null) {
-            token = String.valueOf(System.console().readPassword("Discord bot token: "));
+            token = String.valueOf(System.console().readPassword("Discord bot token (Hidden): "));
         } else {
             token = UserInput.getString("Discord bot token: ");
         }
         boolean headless = UserInput.getBoolean("Headless mode? (true/false): ");
-        String commandPrefix = UserInput.getString("Command Prefix? (Default is '!'): ");
-        //List<String> activityMessages = UserInput.getStringList("Custom Activity Messages");
 
-        return Map.of("discordBotToken", token, "headless", headless, "commandPrefix", commandPrefix);
+        return Map.of("discordBotToken", token, "headless", headless);
     }
 
     public String getDiscordBotToken() {
@@ -122,20 +111,11 @@ public class Configuration {
         this.headless = headless;
     }
 
-    public String getCommandPrefix() {
-        return commandPrefix;
-    }
-
-    public void setCommandPrefix(String commandPrefix) {
-        this.commandPrefix = commandPrefix;
-    }
-
     @Override
     public String toString() {
         return "Configuration{" +
                 "discordBotToken='" + discordBotToken + '\'' +
                 ", headless=" + headless +
-                ", commandPrefix='" + commandPrefix + '\'' +
                 '}';
     }
 }

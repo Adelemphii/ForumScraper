@@ -8,4 +8,9 @@ public class CommandPing implements BaseCommand {
     public void execute(MessageReceivedEvent event) {
         event.getMessage().reply("Pong!").queue();
     }
+
+    @Override
+    public boolean requireAdmin() {
+        return false;
+    }
 }
