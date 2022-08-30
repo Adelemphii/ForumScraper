@@ -50,6 +50,7 @@ public class DiscordBot {
         commands.put("channel", new CommandChannel());
         commands.put("config", new CommandConfig());
         commands.put("credits", new CommandCredits());
+        commands.put("help", new CommandHelp());
     }
 
     public boolean login(String token) {

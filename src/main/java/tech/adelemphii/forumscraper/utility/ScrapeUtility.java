@@ -21,10 +21,13 @@ import tech.adelemphii.forumscraper.objects.TopicType;
 import tech.adelemphii.forumscraper.utility.data.ServerStorageUtility;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Optional;
 
 public class ScrapeUtility {
 
@@ -78,6 +81,18 @@ public class ScrapeUtility {
 
         if(topicList == null) {
             return "TOPICS NOT LOADED";
+        }
+        return null;
+    }
+
+    private static String doChecks(Server server, Guild guild) {
+        if(server == null) {
+            return "SERVER IS NULL";
+        }
+
+        TextChannel channel = guild.getTextChannelById(server.getPingUpdateChannel());
+        if(channel == null) {
+            return "POPULAR TOPICS CHANNEL NOT SELECTED";
         }
         return null;
     }
@@ -169,6 +184,52 @@ public class ScrapeUtility {
                             new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, (e) -> {
                                 channel.sendMessageEmbeds(embedList).queue(message
                                         -> server.setLatestTopicsMessage(message.getIdLong()));
+                                ServerStorageUtility.addServer(server);
+                            })
+                    );
+        }
+        return null;
+    }
+
+    public static String sendPingUpdate(Guild guild) {
+        Server server = ServerStorageUtility.getServer(guild.getIdLong());
+        String checks = doChecks(server, guild);
+
+        if(checks != null) {
+            return checks;
+        }
+
+        String name = "lotc";
+
+        Map<String, EmbedBuilder> embed = GeneralUtility.pingServer("mc.lotc.co", name);
+        Optional<String> base64Opt = embed.keySet().stream().findFirst();
+        String base64 = "";
+        if(base64Opt.isPresent()) {
+            base64 = base64Opt.get();
+        }
+
+        EmbedBuilder embedBuilder = embed.get(base64);
+
+        TextChannel channel = guild.getTextChannelById(server.getPingUpdateChannel());
+
+        assert channel != null;
+        if(server.getPingUpdateMessage() == null) {
+
+            File file = GeneralUtility.getFileFromCache(name).exists()
+                    ? GeneralUtility.getFileFromCache(name) : GeneralUtility.decodeToFile(base64, name);
+            if(file != null && file.exists()) {
+                channel.sendFile(file, name + ".png").setEmbeds(embedBuilder.build()).queue(message -> server.setPingUpdateMessage(message.getIdLong()));
+            } else {
+                channel.sendMessageEmbeds(embedBuilder.build()).queue(message -> server.setPingUpdateMessage(message.getIdLong()));
+            }
+            ServerStorageUtility.addServer(server);
+        } else {
+
+            channel.retrieveMessageById(server.getPingUpdateMessage())
+                    .queue(topicMessage -> topicMessage.editMessageEmbeds(embedBuilder.setThumbnail(null).build()).queue(),
+                            new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, (e) -> {
+                                channel.sendMessageEmbeds(embedBuilder.setThumbnail(null).build()).queue(message
+                                        -> server.setPingUpdateMessage(message.getIdLong()));
                                 ServerStorageUtility.addServer(server);
                             })
                     );

@@ -35,6 +35,7 @@ public class ReadyListener implements EventListener {
                 ScrapeUtility.sendStatusUpdates(guildReadyEvent.getGuild());
                 ScrapeUtility.sendPopularTopics(guildReadyEvent.getGuild());
                 ScrapeUtility.sendLatestTopics(guildReadyEvent.getGuild());
+                ScrapeUtility.sendPingUpdate(guildReadyEvent.getGuild());
             };
 
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);

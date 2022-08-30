@@ -10,6 +10,9 @@ import tech.adelemphii.forumscraper.objects.Server;
 import tech.adelemphii.forumscraper.utility.GeneralUtility;
 import tech.adelemphii.forumscraper.utility.data.ServerStorageUtility;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class CommandConfig implements BaseCommand {
 
     @Override
@@ -84,13 +87,15 @@ public class CommandConfig implements BaseCommand {
         builder.addField("Admin Role",  server.getAdminRoleID() + "", true);
         builder.addField("Commands Channel", "<#" + server.getCommandsChannelID() + ">", false);
 
-        long popTop = server.getPopularTopicsChannel();
-        long latTop = server.getLatestTopicsChannel();
-        long statUp = server.getStatusUpdatesChannel();
+        Long popTop = server.getPopularTopicsChannel();
+        Long latTop = server.getLatestTopicsChannel();
+        Long statUp = server.getStatusUpdatesChannel();
+        Long pingUpdate = server.getPingUpdateChannel();
 
         builder.addField("Popular Topics Channel", "<#" + popTop + ">", true);
         builder.addField("Latest Topics Channel",  "<#" + latTop + ">", true);
         builder.addField("Status Updates Channel", "<#" + statUp + ">", true);
+        builder.addField("Ping Update Channel", "<#" + pingUpdate + ">", true);
 
         Message popTopMessage = GeneralUtility.getUpdateMessage(server, popTop, server.getPopularTopicMessage());
         if(popTopMessage != null) {
@@ -103,6 +108,10 @@ public class CommandConfig implements BaseCommand {
         Message statUpMessage = GeneralUtility.getUpdateMessage(server, statUp, server.getStatusUpdatesMessage());
         if(statUpMessage != null) {
             builder.addField("Status Updates Message", statUpMessage.getJumpUrl(), false);
+        }
+        Message pingUpdateMessage = GeneralUtility.getUpdateMessage(server, pingUpdate, server.getPingUpdateMessage());
+        if(pingUpdateMessage != null) {
+            builder.addField("Ping Updates Message", pingUpdateMessage.getJumpUrl(), false);
         }
 
         return builder.build();
@@ -124,5 +133,15 @@ public class CommandConfig implements BaseCommand {
     @Override
     public boolean requireAdmin() {
         return true;
+    }
+
+    @Override
+    public String name() {
+        return "config";
+    }
+
+    @Override
+    public List<String> subCommands() {
+        return Arrays.asList("display", "help", "set");
     }
 }

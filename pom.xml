@@ -63,7 +63,19 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>nurio-repo</id>
+            <url>https://nurio.me/repo/mvn/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+        </dependency>
         <!--- Discord API Dependency -->
         <dependency>
             <groupId>net.dv8tion</groupId>
@@ -114,7 +126,13 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.36.0.3</version>
         </dependency>
-
+        <!-- Minecraft Server Ping -->
+        <dependency>
+            <groupId>me.nurio.minecraft</groupId>
+            <artifactId>pinger</artifactId>
+            <version>0.0.3</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>

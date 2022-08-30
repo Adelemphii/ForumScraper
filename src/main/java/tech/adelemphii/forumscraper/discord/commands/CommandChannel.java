@@ -2,15 +2,15 @@ package tech.adelemphii.forumscraper.discord.commands;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import tech.adelemphii.forumscraper.objects.Server;
-import tech.adelemphii.forumscraper.utility.GeneralUtility;
 import tech.adelemphii.forumscraper.utility.ScrapeUtility;
 import tech.adelemphii.forumscraper.utility.data.ServerStorageUtility;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class CommandChannel implements BaseCommand {
 
@@ -50,7 +50,7 @@ public class CommandChannel implements BaseCommand {
         builder.setDescription(server.getCommandPrefix() + "channel <command> <type> <id>");
 
         builder.addField("Argument 1", "Valid Subcommands: set, saveconfig, update, help", false);
-        builder.addField("Argument 2", "Valid types: popular_topics, latest_topics, status_updates", false);
+        builder.addField("Argument 2", "Valid types: popular_topics, latest_topics, status_updates, ping_updates", false);
         builder.addField("Argument 3", "Channel ID, such as 819699195681832991", false);
 
         message.reply("Examples: " + server.getCommandPrefix() + "channel set popular_topics 910726981610512415 or " +
@@ -66,6 +66,7 @@ public class CommandChannel implements BaseCommand {
         String popularTopicError = ScrapeUtility.sendPopularTopics(guild);
         String latestTopicError = ScrapeUtility.sendLatestTopics(guild);
         String statusUpdateError = ScrapeUtility.sendStatusUpdates(guild);
+        String pingUpdateError = ScrapeUtility.sendPingUpdate(guild);
         if(popularTopicError != null) {
             message.reply("Error: " + popularTopicError).queue();
         }
@@ -76,6 +77,10 @@ public class CommandChannel implements BaseCommand {
 
         if(statusUpdateError != null) {
             message.reply("Error: " + statusUpdateError).queue();
+        }
+
+        if(pingUpdateError != null) {
+            message.reply("Error: " + pingUpdateError).queue();
         }
     }
 
@@ -93,6 +98,10 @@ public class CommandChannel implements BaseCommand {
                 server.setStatusUpdatesChannel(Long.parseLong(args[2]));
                 return true;
             }
+            case "PING_UPDATES" -> {
+                server.setPingUpdateChannel(Long.parseLong(args[2]));
+                return true;
+            }
             default -> {
                 return false;
             }
@@ -102,5 +111,15 @@ public class CommandChannel implements BaseCommand {
     @Override
     public boolean requireAdmin() {
         return true;
+    }
+
+    @Override
+    public String name() {
+        return "channel";
+    }
+
+    @Override
+    public List<String> subCommands() {
+        return Arrays.asList("set", "saveconfig", "update", "help");
     }
 }

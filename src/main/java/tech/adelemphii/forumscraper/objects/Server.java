@@ -8,10 +8,12 @@ public class Server {
     private Long popularTopicsChannel;
     private Long latestTopicsChannel;
     private Long statusUpdatesChannel;
+    private Long pingUpdateChannel;
 
     private Long popularTopicMessage;
     private Long latestTopicsMessage;
     private Long statusUpdatesMessage;
+    private Long pingUpdateMessage;
 
     // per-server config
     private String commandPrefix = "!";
@@ -105,6 +107,22 @@ public class Server {
         this.commandsChannelID = commandsChannelID;
     }
 
+    public Long getPingUpdateChannel() {
+        return pingUpdateChannel;
+    }
+
+    public void setPingUpdateChannel(Long pingUpdateChannel) {
+        this.pingUpdateChannel = pingUpdateChannel;
+    }
+
+    public Long getPingUpdateMessage() {
+        return pingUpdateMessage;
+    }
+
+    public void setPingUpdateMessage(Long pingUpdateMessage) {
+        this.pingUpdateMessage = pingUpdateMessage;
+    }
+
     @Override
     public String toString() {
         return "Server{" +
@@ -112,9 +130,11 @@ public class Server {
                 ", popularTopicsChannel=" + popularTopicsChannel +
                 ", latestTopicsChannel=" + latestTopicsChannel +
                 ", statusUpdatesChannel=" + statusUpdatesChannel +
+                ", pingUpdateChannel=" + pingUpdateChannel +
                 ", popularTopicMessage=" + popularTopicMessage +
                 ", latestTopicsMessage=" + latestTopicsMessage +
                 ", statusUpdatesMessage=" + statusUpdatesMessage +
+                ", pingUpdateMessage=" + pingUpdateMessage +
                 ", commandPrefix='" + commandPrefix + '\'' +
                 ", adminRoleID=" + adminRoleID +
                 ", commandsChannelID=" + commandsChannelID +

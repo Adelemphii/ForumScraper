@@ -73,12 +73,12 @@ public class MessageListener implements EventListener {
                 ArrayList<Cooldown> toRemove = new ArrayList<>();
                 if(!cooldowns.isEmpty()) {
                     for (Cooldown cooldown : cooldowns) {
-                        if(cooldown.getMember().equals(member)) {
+                        if(cooldown.getMember().equals(member) && !GeneralUtility.isAdmin(guild, member, server)) {
                             if(cooldown.getCooldown() <= 0) {
                                 toRemove.add(cooldown);
                             } else {
                                 message.reply("You are on command cooldown for " + cooldown.getCooldown() + " seconds")
-                                        .queue(msg -> msg.delete().queueAfter(5, TimeUnit.SECONDS));
+                                        .queue(msg -> msg.delete().queueAfter(cooldown.getCooldown(), TimeUnit.SECONDS));
                                 return;
                             }
                         }

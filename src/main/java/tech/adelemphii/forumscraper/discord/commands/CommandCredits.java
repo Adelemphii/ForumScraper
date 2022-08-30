@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 import java.awt.*;
+import java.util.List;
 
 public class CommandCredits implements BaseCommand {
 
@@ -16,6 +17,16 @@ public class CommandCredits implements BaseCommand {
     @Override
     public boolean requireAdmin() {
         return false;
+    }
+
+    @Override
+    public String name() {
+        return "credits";
+    }
+
+    @Override
+    public List<String> subCommands() {
+        return null;
     }
 
     private MessageEmbed getCreditsEmbed() {
