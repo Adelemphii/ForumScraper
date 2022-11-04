@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -208,31 +209,34 @@ public class ScrapeUtility {
             base64 = base64Opt.get();
         }
 
-        EmbedBuilder embedBuilder = embed.get(base64);
+        EmbedBuilder serverEmbed = embed.get(base64);
+        EmbedBuilder websiteEmbed = GeneralUtility.pingWebsite("https://www.lordofthecraft.net/forums/");
 
         TextChannel channel = guild.getTextChannelById(server.getPingUpdateChannel());
 
         assert channel != null;
         if(server.getPingUpdateMessage() == null) {
-
-            File file = GeneralUtility.getFileFromCache(name).exists()
+            File file = GeneralUtility.getFileFromCache(name) != null
                     ? GeneralUtility.getFileFromCache(name) : GeneralUtility.decodeToFile(base64, name);
             if(file != null && file.exists()) {
-                channel.sendFile(file, name + ".png").setEmbeds(embedBuilder.build()).queue(message -> server.setPingUpdateMessage(message.getIdLong()));
+                channel.sendFile(file, name + ".png").setEmbeds(List.of(serverEmbed.build(), websiteEmbed.build()))
+                        .queue(message -> server.setPingUpdateMessage(message.getIdLong()));
             } else {
-                channel.sendMessageEmbeds(embedBuilder.build()).queue(message -> server.setPingUpdateMessage(message.getIdLong()));
+                channel.sendMessageEmbeds(List.of(serverEmbed.build(), websiteEmbed.build()))
+                        .queue(message -> server.setPingUpdateMessage(message.getIdLong()));
             }
             ServerStorageUtility.addServer(server);
         } else {
-
             channel.retrieveMessageById(server.getPingUpdateMessage())
-                    .queue(topicMessage -> topicMessage.editMessageEmbeds(embedBuilder.setThumbnail(null).build()).queue(),
+                    .queue(topicMessage ->
+                                    topicMessage.editMessageEmbeds(List.of(serverEmbed.setThumbnail(null).build(), websiteEmbed.build()))
+                                            .queue(),
                             new ErrorHandler().handle(ErrorResponse.UNKNOWN_MESSAGE, (e) -> {
-                                channel.sendMessageEmbeds(embedBuilder.setThumbnail(null).build()).queue(message
+                                channel.sendMessageEmbeds(List.of(serverEmbed.setThumbnail(null).build(), websiteEmbed.build()))
+                                        .queue(message
                                         -> server.setPingUpdateMessage(message.getIdLong()));
                                 ServerStorageUtility.addServer(server);
-                            })
-                    );
+                            }));
         }
         return null;
     }
@@ -268,6 +272,15 @@ public class ScrapeUtility {
                     );
         }
         return null;
+    }
+
+    public static boolean upCheck(String url) {
+        try {
+            Jsoup.connect(url).get();
+            return true;
+        } catch(IOException e) {
+            return false;
+        }
     }
 
     public static ArrayList<Topic> scrapeStatuses(String url) {
@@ -319,7 +332,7 @@ public class ScrapeUtility {
             }
             return topics;
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error: Is the website offline?");
         }
         return null;
     }
@@ -382,7 +395,7 @@ public class ScrapeUtility {
             }
             return topics;
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Error: Is the website offline?");
             return null;
         }
     }

@@ -4,7 +4,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import tech.adelemphii.forumscraper.utility.GeneralUtility;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -23,16 +22,18 @@ public class CommandPing implements BaseCommand {
             base64 = base64Opt.get();
         }
 
-        EmbedBuilder embedBuilder = embed.get(base64);
+        EmbedBuilder serverEmbed = embed.get(base64);
+        EmbedBuilder websiteEmbed = GeneralUtility.pingWebsite("https://www.lorcofthecraft.net/forums/");
 
         if(!base64.isEmpty()) {
-            File file = GeneralUtility.getFileFromCache(name).exists()
+            File file = GeneralUtility.getFileFromCache(name) != null
                     ? GeneralUtility.getFileFromCache(name) : GeneralUtility.decodeToFile(base64, name);
             if(file != null && file.exists()) {
-                event.getChannel().sendFile(file, name + ".png").setEmbeds(embedBuilder.build()).queue();
+                event.getChannel().sendFile(file, name + ".png").setEmbeds(List.of(serverEmbed.build(), websiteEmbed.build()))
+                        .queue();
             }
         } else {
-            event.getChannel().sendMessageEmbeds(embedBuilder.setThumbnail(null).build()).queue();
+            event.getChannel().sendMessageEmbeds(List.of(serverEmbed.setThumbnail(null).build(), websiteEmbed.build())).queue();
         }
 
     }

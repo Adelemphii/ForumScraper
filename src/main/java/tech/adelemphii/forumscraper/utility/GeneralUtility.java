@@ -81,6 +81,21 @@ public class GeneralUtility {
         return Map.of(base64Favicon, embedBuilder);
     }
 
+    public static EmbedBuilder pingWebsite(String url) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        embedBuilder.setTitle("Website Status");
+
+        boolean online = ScrapeUtility.upCheck(url);
+
+        String text = online ? "The Website is **ONLINE!**" : "The website is **OFFLINE!**";
+        embedBuilder.setDescription(text);
+
+        Color color = online ? Color.GREEN : Color.RED;
+        embedBuilder.setColor(color);
+        return embedBuilder;
+    }
+
     public static File saveImageToCache(byte[] decodedBytes, String name) {
         try {
             File output = new File(ForumScraper.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();

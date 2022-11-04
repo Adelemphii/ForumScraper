@@ -8,10 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import tech.adelemphii.forumscraper.discord.DiscordBot;
 import tech.adelemphii.forumscraper.utility.ScrapeUtility;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
